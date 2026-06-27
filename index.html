@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEFL Practice</title>
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --success: #16a34a;
+    --error: #dc2626;
+    --warning: #d97706;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  header h1 { font-size: 1.4rem; font-weight: 700; }
+  header .subtitle { font-size: 0.85rem; opacity: 0.85; }
+
+  .score-badge {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  nav {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  nav button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  nav button:hover:not(.active) { color: var(--text); }
+
+  .tab-icon { margin-right: 6px; }
+
+  main { max-width: 800px; margin: 32px auto; padding: 0 20px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    margin-bottom: 20px;
+  }
+
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .question-counter {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 500;
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  h3 { font-size: 1rem; font-weight: 600; color: var(--muted); margin-bottom: 16px; }
+
+  /* ── READING ─────────────────────── */
+  .passage {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--text);
+  }
+
+  .blank-input {
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid var(--primary);
+    background: #eff6ff;
+    padding: 2px 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--primary);
+    width: 130px;
+    outline: none;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.2s;
+  }
+
+  .blank-input:focus { background: #dbeafe; }
+  .blank-input.correct { border-bottom-color: var(--success); background: #f0fdf4; color: var(--success); }
+  .blank-input.incorrect { border-bottom-color: var(--error); background: #fef2f2; color: var(--error); }
+
+  .hint-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  .letter-hint {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 14px 0 6px;
+    align-items: flex-end;
+  }
+
+  .letter-box {
+    width: 30px;
+    height: 36px;
+    border-bottom: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: #eff6ff;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .letter-box.blank {
+    color: transparent;
+    background: #f8fafc;
+    border-bottom-color: var(--border);
+  }
+
+  .word-input-wrap {
+    margin-top: 10px;
+  }
+
+  .blank-marker {
+    display: inline-block;
+    border-bottom: 2px solid var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+    padding: 0 4px;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* ── LISTENING ───────────────────── */
+  .listen-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .play-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .play-btn:hover { background: var(--primary-dark); }
+  .play-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+  .play-badge {
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.25);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .transcript-area {
+    width: 100%;
+    min-height: 90px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .transcript-area:focus { border-color: var(--primary); }
+  .transcript-area.correct { border-color: var(--success); background: #f0fdf4; }
+  .transcript-area.incorrect { border-color: var(--error); background: #fef2f2; }
+
+  .listen-tip {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ── WRITING ─────────────────────── */
+  .writing-context {
+    background: #f0f9ff;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 0.97rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .context-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #0ea5e9;
+    background: #e0f2fe;
+    border-radius: 10px;
+    padding: 1px 8px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .sentence-target {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+  }
+
+  .answer-slots {
+    min-height: 52px;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+
+  .answer-slots.drag-over { border-color: var(--primary); background: #eff6ff; }
+  .answer-slots.correct { border-color: var(--success); background: #f0fdf4; }
+  .answer-slots.incorrect { border-color: var(--error); background: #fef2f2; }
+
+  .answer-slots .empty-hint {
+    color: var(--muted);
+    font-size: 0.9rem;
+    user-select: none;
+  }
+
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .word-chip {
+    background: #eff6ff;
+    color: var(--primary);
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .word-chip:hover { background: #dbeafe; transform: translateY(-1px); }
+  .word-chip.used { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+  .placed-word {
+    background: var(--primary);
+    color: white;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .placed-word .remove-x {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: bold;
+  }
+
+  .placed-word:hover .remove-x { opacity: 1; }
+
+  /* ── BUTTONS & FEEDBACK ──────────── */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+  .feedback.error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+
+  .feedback strong { display: block; margin-bottom: 4px; }
+
+  /* ── COMPLETION SCREEN ───────────── */
+  .completion {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .completion .trophy { font-size: 4rem; margin-bottom: 16px; }
+  .completion h2 { font-size: 1.6rem; margin-bottom: 8px; }
+  .completion p { color: var(--muted); margin-bottom: 24px; }
+
+  .score-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 16px 0;
+  }
+
+  /* ── TIMER ───────────────────────── */
+  .timer-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+  }
+  .timer-wrap svg { position: absolute; top: 0; left: 0; }
+  .timer-num {
+    position: relative;
+    font-size: 0.78rem;
+    font-weight: 700;
+    z-index: 1;
+  }
+
+  /* ── HISTORY NAV ─────────────────── */
+  .hist-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    margin-bottom: 16px;
+  }
+  .hist-label {
+    flex: 1;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .hist-label.review-label { color: var(--warning); }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+  .btn-sm:disabled { opacity: 0.35; cursor: default; }
+
+  /* ── REVIEW CARD ─────────────────── */
+  .review-card { border: 2px solid var(--warning); }
+  .review-banner {
+    background: var(--warning);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  /* ── RESPONSIVE ──────────────────── */
+  @media (max-width: 600px) {
+    main { padding: 0 12px; margin: 20px auto; }
+    .card { padding: 20px 16px; }
+    nav button { padding: 12px 12px; font-size: 0.85rem; }
+    .play-btn { padding: 9px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>TOEFL Practice</h1>
+    <div class="subtitle">Reading · Listening · Writing</div>
+  </div>
+  <div class="score-badge" id="totalScore">Score: 0 / 0</div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('reading')"><span class="tab-icon">📖</span>Reading</button>
+  <button onclick="showTab('listening')"><span class="tab-icon">🎧</span>Listening</button>
+  <button onclick="showTab('writing')"><span class="tab-icon">✏️</span>Writing</button>
+</nav>
+
+<main>
+
+  <!-- ══════════════════════════════════════════ READING -->
+  <section id="reading" class="section active"></section>
+
+  <!-- ══════════════════════════════════════════ LISTENING -->
+  <section id="listening" class="section"></section>
+
+  <!-- ══════════════════════════════════════════ WRITING -->
+  <section id="writing" class="section"></section>
+
+</main>
+
+<script src="questions.js"></script>
+<script src="writing-questions.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// QUESTIONS — shuffled once at startup
+// ─────────────────────────────────────────────────────────────
+let readingQuestions = [];
+function initReading() {
+  readingQuestions = [...READING_QUESTIONS].sort(() => Math.random() - 0.5);
+}
+
+const listeningQuestions = [
+  // ── ACADEMIC LIFE ──
+  { sentence: "The university requires all international students to submit their transcripts before the application deadline." },
+  { sentence: "Researchers have discovered that regular exercise significantly improves cognitive function in older adults." },
+  { sentence: "The professor asked the class to analyze the primary sources before writing their research papers." },
+  { sentence: "Students who participate in extracurricular activities tend to develop stronger leadership and communication skills." },
+  { sentence: "The library offers free access to thousands of academic journals for all enrolled students." },
+  { sentence: "The final exam will cover all material discussed during the semester, including the supplementary readings." },
+  { sentence: "Graduate students are expected to attend weekly seminars and contribute to ongoing research projects." },
+  { sentence: "The scholarship application requires a personal statement, two letters of recommendation, and official transcripts." },
+  { sentence: "Academic integrity is fundamental to the university's mission and must be upheld in all submitted work." },
+  { sentence: "The professor postponed the deadline after several students requested additional time to complete their assignments." },
+  { sentence: "Office hours provide an opportunity for students to discuss course material directly with their instructor." },
+  { sentence: "Peer review helps students identify weaknesses in their arguments and improve the overall quality of their writing." },
+  { sentence: "The dissertation committee meets twice a year to evaluate each doctoral candidate's progress." },
+  { sentence: "Many universities now offer hybrid courses that combine in-person lectures with online components." },
+  { sentence: "International students must demonstrate English language proficiency through an approved standardized test." },
+
+  // ── SCIENCE & RESEARCH ──
+  { sentence: "Scientists have identified a new species of deep-sea fish that can produce its own bioluminescent light." },
+  { sentence: "The research team published its findings in a peer-reviewed journal after three years of investigation." },
+  { sentence: "Climate models predict that sea levels will rise by more than half a meter by the end of the century." },
+  { sentence: "The experiment required participants to complete a series of cognitive tasks under controlled conditions." },
+  { sentence: "Advances in genetic sequencing have made it possible to identify hereditary diseases before symptoms appear." },
+  { sentence: "The laboratory reported that the new compound significantly reduced inflammation in animal trials." },
+  { sentence: "Astronomers announced the discovery of an exoplanet within the habitable zone of a nearby star." },
+  { sentence: "Renewable energy technology has become far more affordable over the past decade due to economies of scale." },
+  { sentence: "The double-blind study ensured that neither the participants nor the researchers knew who received the treatment." },
+  { sentence: "Researchers are investigating the long-term effects of microplastic exposure on marine ecosystems." },
+  { sentence: "The vaccine was shown to be ninety-four percent effective in preventing severe illness in clinical trials." },
+  { sentence: "Artificial intelligence algorithms can now detect certain cancers with greater accuracy than trained radiologists." },
+  { sentence: "The geological survey revealed evidence of volcanic activity in the region approximately ten thousand years ago." },
+  { sentence: "Neuroscientists have found that sleep plays a critical role in consolidating memories formed during the day." },
+  { sentence: "The study concluded that air pollution is responsible for more than seven million premature deaths each year." },
+
+  // ── ENVIRONMENT & NATURE ──
+  { sentence: "Environmental policies must balance economic growth with the need to protect natural ecosystems." },
+  { sentence: "Deforestation in the Amazon basin has accelerated in recent years despite international pressure to stop." },
+  { sentence: "The coral reef bleaching event was triggered by unusually warm ocean temperatures during the summer months." },
+  { sentence: "Conservation groups are working to restore wetland habitats that were drained for agricultural use decades ago." },
+  { sentence: "The migration patterns of monarch butterflies have shifted significantly due to changing climate conditions." },
+  { sentence: "Plastic pollution in the ocean poses a severe threat to marine animals that mistake debris for food." },
+  { sentence: "The national park service has introduced controlled burns to reduce the risk of larger wildfires in the future." },
+  { sentence: "Scientists are monitoring the rate at which Arctic permafrost is thawing and releasing trapped greenhouse gases." },
+  { sentence: "Urban tree planting initiatives have been shown to reduce city temperatures and improve air quality." },
+  { sentence: "The decline of insect populations threatens agriculture because many crops depend on pollinators to reproduce." },
+  { sentence: "Governments around the world have pledged to achieve net-zero carbon emissions by the middle of the century." },
+  { sentence: "Overfishing has reduced fish stocks to critically low levels in several of the world's major fishing regions." },
+  { sentence: "The environmental impact assessment revealed that the proposed highway would cut through a protected forest." },
+  { sentence: "Sustainable farming practices can help preserve soil fertility and reduce the need for chemical fertilizers." },
+  { sentence: "Invasive species often outcompete native plants and animals for resources, disrupting local ecosystems." },
+
+  // ── HISTORY & SOCIETY ──
+  { sentence: "The Industrial Revolution transformed the economic and social structure of Europe over the course of a century." },
+  { sentence: "Historians debate whether the fall of the Roman Empire was caused by internal decay or external pressure." },
+  { sentence: "The civil rights movement achieved landmark legislative victories that reshaped American society in the 1960s." },
+  { sentence: "Colonial rule had lasting effects on the political and economic development of many African nations." },
+  { sentence: "The printing press enabled the rapid spread of new ideas and contributed to the Protestant Reformation." },
+  { sentence: "The Great Wall of China was constructed over several centuries to defend against invasions from the north." },
+  { sentence: "The women's suffrage movement fought for decades before achieving the right to vote in many democratic nations." },
+  { sentence: "The invention of the steam engine revolutionized transportation and manufacturing during the nineteenth century." },
+  { sentence: "Ancient trade routes facilitated the exchange of goods, languages, and cultural practices across continents." },
+  { sentence: "The atomic bombings of Hiroshima and Nagasaki brought World War II to an end but caused massive civilian casualties." },
+  { sentence: "The French Revolution introduced ideals of liberty, equality, and fraternity that influenced political thought worldwide." },
+  { sentence: "Urbanization accelerated during the twentieth century as people moved from rural areas to cities in search of work." },
+  { sentence: "Archaeological discoveries have revealed that ancient civilizations were far more interconnected than previously believed." },
+  { sentence: "The collapse of the Soviet Union in 1991 led to major geopolitical shifts and the independence of several nations." },
+  { sentence: "The Silk Road connected East Asia to the Mediterranean and enabled the exchange of silk, spices, and ideas." },
+
+  // ── TECHNOLOGY ──
+  { sentence: "The new transit system is expected to reduce traffic congestion and lower carbon emissions across the metropolitan area." },
+  { sentence: "Cybersecurity threats have become increasingly sophisticated as more critical infrastructure is connected to the internet." },
+  { sentence: "Electric vehicles are gaining market share as battery technology improves and charging infrastructure expands." },
+  { sentence: "Artificial intelligence is being used to assist doctors in diagnosing diseases and developing personalized treatment plans." },
+  { sentence: "The development of the smartphone fundamentally changed the way people communicate, work, and access information." },
+  { sentence: "Social media platforms have been criticized for amplifying misinformation and contributing to political polarization." },
+  { sentence: "Quantum computing has the potential to solve complex optimization problems that are beyond the reach of classical computers." },
+  { sentence: "Remote work technologies have allowed many employees to work productively from home during the global pandemic." },
+  { sentence: "The rollout of fifth-generation wireless networks is expected to enable faster data transmission and new digital services." },
+  { sentence: "Facial recognition technology raises significant concerns about privacy and the potential for mass surveillance." },
+  { sentence: "Self-driving vehicles are being tested in several cities, but widespread adoption depends on resolving safety and regulatory issues." },
+  { sentence: "Blockchain technology offers a transparent and tamper-resistant method for recording transactions without a central authority." },
+  { sentence: "The global chip shortage disrupted manufacturing across multiple industries and highlighted the fragility of supply chains." },
+  { sentence: "Streaming services have disrupted traditional television broadcasting and changed how audiences consume entertainment." },
+  { sentence: "Wearable health monitors can continuously track vital signs and alert users to potential medical issues." },
+
+  // ── ECONOMICS & BUSINESS ──
+  { sentence: "The committee will review all proposals and announce the results at the end of the fiscal quarter." },
+  { sentence: "Inflation reduces the purchasing power of consumers and can slow economic growth if it remains unchecked for too long." },
+  { sentence: "The central bank raised interest rates in an effort to bring inflation under control without triggering a recession." },
+  { sentence: "Multinational corporations benefit from economies of scale and the ability to move production to lower-cost countries." },
+  { sentence: "The unemployment rate fell to a historic low after several years of strong job creation in the service sector." },
+  { sentence: "Supply chain disruptions caused by the pandemic led to shortages of consumer goods and rising prices worldwide." },
+  { sentence: "Foreign direct investment plays a significant role in the economic development of emerging market economies." },
+  { sentence: "The government introduced a stimulus package to support businesses and workers affected by the economic downturn." },
+  { sentence: "Trade tariffs imposed by one country often prompt retaliatory measures from its trading partners." },
+  { sentence: "Income inequality has widened in many developed economies over the past thirty years as wages for lower earners stagnated." },
+  { sentence: "Venture capital funding reached record levels last year as investors sought opportunities in technology startups." },
+  { sentence: "The housing market has become increasingly unaffordable for first-time buyers in many major cities." },
+  { sentence: "Corporate mergers and acquisitions must be approved by regulatory authorities to prevent the formation of monopolies." },
+  { sentence: "Consumer confidence tends to rise when unemployment is low and household incomes are growing steadily." },
+  { sentence: "The green economy is creating new jobs in renewable energy, sustainable construction, and environmental services." },
+
+  // ── HEALTH & MEDICINE ──
+  { sentence: "Regular physical activity reduces the risk of chronic diseases such as heart disease, diabetes, and certain cancers." },
+  { sentence: "The World Health Organization declared the outbreak a public health emergency of international concern." },
+  { sentence: "Mental health services remain underfunded in many countries despite the growing prevalence of anxiety and depression." },
+  { sentence: "A balanced diet rich in fruits, vegetables, and whole grains is associated with lower rates of cardiovascular disease." },
+  { sentence: "The hospital reduced its infection rate by implementing stricter hand hygiene protocols among clinical staff." },
+  { sentence: "Long-term exposure to air pollution has been linked to respiratory disease, cardiovascular problems, and cognitive decline." },
+  { sentence: "Telemedicine services expanded rapidly during the pandemic, allowing patients to consult doctors remotely." },
+  { sentence: "The antibiotic resistance crisis is worsening as bacteria evolve faster than new drugs can be developed." },
+  { sentence: "Early childhood nutrition has a profound impact on physical development, cognitive ability, and long-term health outcomes." },
+  { sentence: "Surgical robots allow surgeons to perform complex procedures with greater precision and smaller incisions." },
+  { sentence: "Vaccines have eliminated or significantly reduced the burden of several diseases that were once major public health threats." },
+  { sentence: "Chronic stress suppresses immune function, increases blood pressure, and raises the risk of mental health disorders." },
+  { sentence: "Health insurance coverage is associated with better access to preventive care and improved long-term health outcomes." },
+  { sentence: "The new drug showed promising results in reducing tumor size without the severe side effects of traditional chemotherapy." },
+  { sentence: "Regular screening for high blood pressure and cholesterol can help identify cardiovascular risk before symptoms develop." },
+
+  // ── EDUCATION & LEARNING ──
+  { sentence: "Critical thinking involves evaluating arguments carefully and recognizing both their strengths and their limitations." },
+  { sentence: "Early childhood education programs have been shown to improve school readiness and reduce achievement gaps." },
+  { sentence: "Students who read widely for pleasure tend to develop larger vocabularies and stronger comprehension skills." },
+  { sentence: "Project-based learning allows students to apply academic concepts to real-world problems and develop practical skills." },
+  { sentence: "The rise of online learning platforms has made high-quality education accessible to millions of people worldwide." },
+  { sentence: "Formative assessment provides teachers with ongoing information about student understanding and areas of difficulty." },
+  { sentence: "Bilingual education has been found to enhance cognitive flexibility and improve academic performance in multiple subjects." },
+  { sentence: "School funding disparities contribute to unequal educational outcomes between wealthier and lower-income communities." },
+  { sentence: "Professional development programs help teachers stay current with new research on effective instructional methods." },
+  { sentence: "Inclusive classrooms that accommodate students with diverse needs require additional resources and teacher training." },
+  { sentence: "The growth mindset approach encourages students to view effort and perseverance as keys to academic improvement." },
+  { sentence: "Universities are increasingly emphasizing interdisciplinary approaches that combine skills from multiple fields of study." },
+  { sentence: "Standardized tests have been criticized for reflecting socioeconomic advantages rather than true academic ability." },
+  { sentence: "Mentorship programs connect first-generation college students with advisors who can guide them through academic challenges." },
+  { sentence: "Study skills such as spaced repetition and active recall have been proven to improve long-term memory retention." },
+
+  // ── CULTURE & ARTS ──
+  { sentence: "The museum's new exhibition explores the influence of African art on twentieth-century European modernist movements." },
+  { sentence: "Classical music concerts have seen declining audiences in recent decades as younger listeners prefer other genres." },
+  { sentence: "The novel was praised for its nuanced portrayal of immigrant experiences and the search for cultural identity." },
+  { sentence: "Street art has evolved from an act of vandalism into a globally recognized form of artistic expression." },
+  { sentence: "The film festival attracted directors and critics from over fifty countries to screen and discuss new international cinema." },
+  { sentence: "Traditional crafts are being revived in many communities as a way to preserve cultural heritage and support local economies." },
+  { sentence: "The architectural design of the new cultural center was inspired by local indigenous building traditions." },
+  { sentence: "Globalization has spread popular culture across borders while also threatening the diversity of local traditions." },
+  { sentence: "The playwright's work challenges audiences to confront difficult questions about justice, identity, and belonging." },
+  { sentence: "Public libraries serve as vital community spaces where people of all backgrounds can access information and cultural resources." },
+  { sentence: "The orchestra performed a rarely heard symphony that had been left unfinished by the composer at the time of his death." },
+  { sentence: "Literary prizes draw international attention to authors and can dramatically increase a book's readership." },
+  { sentence: "Photography as an art form has been transformed by digital technology and the widespread use of smartphones." },
+  { sentence: "Folk music traditions carry the history and values of communities across generations through song and storytelling." },
+  { sentence: "The cultural exchange program allowed students to spend a semester abroad learning a new language and way of life." },
+
+  // ── POLITICS & GLOBAL AFFAIRS ──
+  { sentence: "The peace negotiations collapsed after neither side could agree on the terms for a lasting ceasefire." },
+  { sentence: "International sanctions have been imposed on the government in response to documented human rights violations." },
+  { sentence: "The election results were disputed by opposition parties, who called for an independent audit of the ballots." },
+  { sentence: "The United Nations Security Council passed a resolution authorizing humanitarian aid to the conflict-affected region." },
+  { sentence: "Democratic institutions depend on an informed citizenry, a free press, and an independent judiciary to function effectively." },
+  { sentence: "The treaty obligates all signatory nations to reduce their greenhouse gas emissions by at least thirty percent within a decade." },
+  { sentence: "Refugee camps are struggling to provide adequate shelter, food, and medical care for the growing number of displaced people." },
+  { sentence: "The new administration announced sweeping immigration reforms aimed at addressing backlogs in the asylum process." },
+  { sentence: "Corruption in public institutions undermines trust in government and diverts resources away from essential services." },
+  { sentence: "The summit brought together leaders from twenty nations to discuss coordinated responses to global economic challenges." },
+  { sentence: "Disinformation campaigns on social media have been linked to increased political polarization and voter confusion." },
+  { sentence: "Foreign aid from wealthier nations plays an important role in supporting development projects in low-income countries." },
+  { sentence: "The constitutional amendment passed by a narrow margin after months of intense debate in the national legislature." },
+  { sentence: "Civil society organizations played a crucial role in documenting abuses and pressuring governments to act." },
+  { sentence: "The trade agreement reduced tariffs on agricultural goods, benefiting farmers in both countries." },
+
+  // ── PSYCHOLOGY & BEHAVIOR ──
+  { sentence: "Cognitive behavioral therapy helps patients identify and challenge negative thought patterns that contribute to anxiety." },
+  { sentence: "Studies show that people are more likely to help strangers when they are the only bystander present." },
+  { sentence: "Long-term stress has been linked to structural changes in the brain regions associated with memory and emotion." },
+  { sentence: "Children who develop secure attachments to their caregivers tend to form healthier relationships later in life." },
+  { sentence: "The placebo effect demonstrates that a patient's expectations can have measurable physical consequences." },
+  { sentence: "Intrinsic motivation, driven by personal interest rather than external reward, tends to produce more sustained effort." },
+  { sentence: "Psychologists have found that sleep deprivation significantly impairs decision-making, creativity, and emotional regulation." },
+  { sentence: "Social media use has been associated with increased feelings of loneliness and lower self-esteem among adolescents." },
+  { sentence: "Habit formation requires consistent repetition over time until a behavior becomes automatic and requires little conscious effort." },
+  { sentence: "Mindfulness practice has been shown to reduce symptoms of depression and improve overall psychological well-being." },
+
+  // ── GEOGRAPHY & URBAN PLANNING ──
+  { sentence: "Rapid urbanization in developing countries is straining infrastructure and increasing demand for affordable housing." },
+  { sentence: "The construction of the high-speed railway reduced travel time between the two major cities from six hours to two." },
+  { sentence: "Coastal cities are investing in flood defenses as rising sea levels increase the risk of storm surge damage." },
+  { sentence: "Green spaces within cities improve residents' mental health, reduce urban heat, and support local biodiversity." },
+  { sentence: "The river delta region is highly fertile but increasingly vulnerable to flooding caused by upstream deforestation." },
+  { sentence: "Mixed-use zoning allows residential and commercial buildings to coexist, reducing the need for long commutes." },
+  { sentence: "The megacity faces severe air pollution, largely driven by vehicle emissions and the burning of fossil fuels." },
+  { sentence: "Rural depopulation is creating labor shortages in agriculture and reducing the viability of small-town services." },
+  { sentence: "The proposed dam would generate significant electricity but would displace thousands of people living in the valley." },
+  { sentence: "Geographers use satellite imagery and geographic information systems to track land use change over time." },
+
+  // ── PHILOSOPHY & ETHICS ──
+  { sentence: "Philosophers have debated for centuries whether human beings possess genuine free will or whether all actions are determined." },
+  { sentence: "Utilitarianism holds that the morally correct action is the one that produces the greatest happiness for the greatest number." },
+  { sentence: "The trolley problem presents a dilemma that exposes tensions between consequentialist and deontological ethical theories." },
+  { sentence: "Kant argued that certain actions are inherently right or wrong, regardless of their consequences for those involved." },
+  { sentence: "Existentialist philosophers emphasize that individuals must create their own meaning in an indifferent universe." },
+  { sentence: "The ethics of artificial intelligence raises urgent questions about accountability, bias, and the value of human judgment." },
+  { sentence: "Social contract theory proposes that political authority is legitimate only when citizens have consented to be governed." },
+  { sentence: "Bioethics committees evaluate the moral implications of emerging medical technologies and clinical research practices." },
+  { sentence: "The principle of autonomy in medical ethics holds that patients have the right to make informed decisions about their care." },
+  { sentence: "Applied ethics examines how abstract moral principles can be used to guide decisions in specific professional contexts." },
+
+  // ── LANGUAGE & COMMUNICATION ──
+  { sentence: "Children acquire their first language through exposure and interaction rather than through formal instruction." },
+  { sentence: "The loss of indigenous languages represents an irreplaceable loss of cultural knowledge, history, and identity." },
+  { sentence: "Nonverbal communication, including facial expressions and gestures, conveys a significant proportion of interpersonal meaning." },
+  { sentence: "Academic writing requires precision, logical organization, and the ability to support claims with credible evidence." },
+  { sentence: "Translation is far more than substituting words; it requires understanding cultural context and intended meaning." },
+  { sentence: "Code-switching, the practice of alternating between languages, is common in bilingual and multilingual communities." },
+  { sentence: "Public speaking skills can be developed through practice, feedback, and exposure to a variety of audiences and formats." },
+  { sentence: "Digital communication has introduced new conventions, abbreviations, and informal registers into everyday language use." },
+  { sentence: "Rhetoric, the art of persuasion through language, has been studied and taught since ancient Greece." },
+  { sentence: "Effective listening is an active skill that involves attention, interpretation, and thoughtful response to the speaker." },
+
+  // ── LAW, JUSTICE & GOVERNANCE ──
+  { sentence: "The court ruled that the evidence had been obtained unlawfully and could not be used in the criminal proceedings." },
+  { sentence: "Restorative justice programs focus on repairing harm and rebuilding relationships rather than simply punishing offenders." },
+  { sentence: "The new data privacy legislation requires companies to obtain explicit consent before collecting personal information." },
+  { sentence: "International law depends on cooperation between sovereign states, since there is no global enforcement body." },
+  { sentence: "Whistleblower protection laws encourage employees to report illegal activity without fear of retaliation from their employers." },
+  { sentence: "The judiciary must remain independent from political influence to ensure fair and impartial administration of justice." },
+  { sentence: "Anti-corruption measures include transparent procurement processes, financial disclosure requirements, and independent oversight." },
+  { sentence: "Consumer protection laws hold manufacturers accountable for product safety and prevent misleading advertising practices." },
+  { sentence: "Legal aid programs ensure that individuals who cannot afford private lawyers still have access to representation in court." },
+  { sentence: "The constitutional court struck down the proposed law on the grounds that it violated fundamental rights guaranteed to citizens." },
+];
+
+// writingQuestions loaded from writing-questions.js — shuffled once at startup
+let writingQuestions = [];
+function initWriting() {
+  writingQuestions = [...WRITING_QUESTIONS].sort(() => Math.random() - 0.5);
+}
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+function freshModState(extra) {
+  return Object.assign({ qIndex: 0, score: 0, total: 0, checked: false, history: [], reviewIdx: -1 }, extra);
+}
+const state = {
+  reading:   freshModState(),
+  listening: freshModState({ plays: 0 }),
+  writing:   freshModState({ placed: [], shuffledWords: [] }),
+};
+
+// ─────────────────────────────────────────────────────────────
+// TIMER  (20 seconds per live question)
+// ─────────────────────────────────────────────────────────────
+const TIMER_SEC = 20;
+const _timers = {};
+
+function startTimer(mod) {
+  stopTimer(mod);
+  let rem = TIMER_SEC;
+  _paintTimer(mod, rem);
+  _timers[mod] = setInterval(() => {
+    rem--;
+    _paintTimer(mod, rem);
+    if (rem <= 0) { stopTimer(mod); _timerExpired(mod); }
+  }, 1000);
+}
+
+function stopTimer(mod) {
+  if (_timers[mod]) { clearInterval(_timers[mod]); _timers[mod] = null; }
+}
+
+function stopAllTimers() { ['reading','listening','writing'].forEach(stopTimer); }
+
+function _paintTimer(mod, rem) {
+  const el = document.getElementById('timer-' + mod);
+  if (!el) return;
+  const circ = 2 * Math.PI * 15;
+  const offset = circ * (1 - rem / TIMER_SEC);
+  const col = rem > 10 ? '#2563eb' : rem > 5 ? '#d97706' : '#dc2626';
+  el.innerHTML = `<svg viewBox="0 0 36 36" width="44" height="44">
+    <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+    <circle cx="18" cy="18" r="15" fill="none" stroke="${col}" stroke-width="3"
+      stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+      transform="rotate(-90 18 18)" style="transition:stroke-dashoffset .9s linear,stroke .3s"/>
+  </svg><span class="timer-num" style="color:${col}">${rem}</span>`;
+}
+
+function _timerExpired(mod) {
+  if (mod === 'reading'   && !state.reading.checked)   checkReading(true);
+  if (mod === 'listening' && !state.listening.checked) checkListening(true);
+  if (mod === 'writing'   && !state.writing.checked)   checkWriting(true);
+}
+
+// ─────────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────────
+
+function showTab(tab) {
+  stopAllTimers();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.textContent.toLowerCase().includes(tab)) b.classList.add('active');
+  });
+  const s = state[tab];
+  if (s && s.reviewIdx === -1 && !s.checked) startTimer(tab);
+}
+
+// ─────────────────────────────────────────────────────────────
+// HISTORY NAV  (shared)
+// ─────────────────────────────────────────────────────────────
+function histNavHTML(mod) {
+  const s = state[mod];
+  const answered = s.history.length;
+  if (answered === 0) return '';
+  const atLive = s.reviewIdx === -1;
+  const canPrev = atLive ? answered > 0 : s.reviewIdx > 0;
+  const canNext = !atLive;
+  const label = atLive
+    ? `<span class="hist-label">Live &nbsp;·&nbsp; ${answered} answered</span>`
+    : `<span class="hist-label review-label">Reviewing ${s.reviewIdx + 1} / ${answered}</span>`;
+  return `<div class="hist-nav">
+    <button class="btn btn-secondary btn-sm" onclick="histPrev('${mod}')" ${canPrev?'':'disabled'}>← Previous</button>
+    ${label}
+    <button class="btn btn-secondary btn-sm" onclick="histNext('${mod}')" ${canNext?'':'disabled'}>Next →</button>
+  </div>`;
+}
+
+function histPrev(mod) {
+  const s = state[mod];
+  stopTimer(mod);
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  if (s.reviewIdx === -1) s.reviewIdx = s.history.length - 1;
+  else if (s.reviewIdx > 0) s.reviewIdx--;
+  renderReview(mod);
+}
+
+function histNext(mod) {
+  const s = state[mod];
+  if (s.reviewIdx === -1) return;
+  if (s.reviewIdx < s.history.length - 1) { s.reviewIdx++; renderReview(mod); }
+  else {
+    s.reviewIdx = -1;
+    ({ reading: renderReading, listening: renderListening, writing: renderWriting })[mod]();
+    if (!s.checked) startTimer(mod);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// REVIEW RENDERER
+// ─────────────────────────────────────────────────────────────
+function renderReview(mod) {
+  const s = state[mod];
+  const entry = s.history[s.reviewIdx];
+  const el = document.getElementById(mod);
+  const nav = histNavHTML(mod);
+
+  if (mod === 'reading') {
+    const passageHTML = entry.q.p.replace('[B]', '<span class="blank-marker">___________</span>');
+    const inputCls = entry.correct ? 'correct' : 'incorrect';
+    const fbCls = entry.correct ? 'success' : 'error';
+    const fbMsg = entry.correct
+      ? `<strong>Correct!</strong> The word is "<em>${entry.q.a}</em>".`
+      : `<strong>Not quite.</strong> You typed "<em>${entry.userAnswer || '(blank)'}</em>". Answer: "<em>${entry.q.a}</em>" — ${entry.q.h}`;
+    el.innerHTML = `<div class="card review-card">
+      <div class="review-banner">Reviewing past question</div>
+      <div class="question-header"><h2>Fill in the Blank</h2></div>
+      <div class="passage" style="margin-bottom:18px">${passageHTML}</div>
+      <div class="letter-hint">${makeLetterHint(entry.q.a)}</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;font-style:italic">Clue: ${entry.q.h}</div>
+      <input class="blank-input ${inputCls}" value="${entry.userAnswer || ''}" readonly style="width:220px;padding:6px 10px"/>
+      <div class="feedback show ${fbCls}" style="margin-top:12px">${fbMsg}</div>
+    </div>${nav}`;
+  }
+
+  if (mod === 'listening') {
+    const inputCls = entry.correct ? 'correct' : 'incorrect';
+    const fbCls = entry.correct ? 'success' : 'error';
+    const fbMsg = entry.correct
+      ? `<strong>Great job!</strong> ${Math.round(entry.accuracy * 100)}% accuracy.<br><em>Original: "${entry.q.sentence}"</em>`
+      : `<strong>${Math.round(entry.accuracy * 100)}% accuracy.</strong><br><em>Original: "${entry.q.sentence}"</em>`;
+    el.innerHTML = `<div class="card review-card">
+      <div class="review-banner">Reviewing past question</div>
+      <div class="question-header"><h2>Listen &amp; Transcribe</h2></div>
+      <button class="play-btn" onclick="replayAudio('${entry.q.sentence.replace(/'/g,"\\'")}')">▶ Replay</button>
+      <textarea class="transcript-area ${inputCls}" readonly rows="3" style="margin-top:14px">${entry.userTranscript}</textarea>
+      <div class="feedback show ${fbCls}" style="margin-top:12px">${fbMsg}</div>
+    </div>${nav}`;
+  }
+
+  if (mod === 'writing') {
+    const slotCls = entry.correct ? 'correct' : 'incorrect';
+    const fbCls = entry.correct ? 'success' : 'error';
+    const fbMsg = entry.correct
+      ? `<strong>Perfect!</strong> That's exactly right.`
+      : `<strong>Not quite.</strong> Correct sentence:<br><em>"${entry.q.s}"</em>`;
+    const contextHTML = entry.q.c
+      ? `<div class="writing-context"><span class="context-label">Context</span>${entry.q.c}</div>` : '';
+    const placedHTML = entry.userSentence
+      ? entry.userSentence.split(' ').map(w => `<div class="placed-word" style="cursor:default">${w}</div>`).join('')
+      : '<span class="empty-hint">(nothing placed)</span>';
+    el.innerHTML = `<div class="card review-card">
+      <div class="review-banner">Reviewing past question</div>
+      <div class="question-header"><h2>Build the Sentence</h2></div>
+      ${contextHTML}
+      <div class="answer-slots ${slotCls}" style="margin-bottom:12px">${placedHTML}</div>
+      <div class="feedback show ${fbCls}">${fbMsg}</div>
+    </div>${nav}`;
+  }
+}
+
+function replayAudio(sentence) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(sentence);
+  u.rate = 0.88; u.lang = 'en-US';
+  const v = window.speechSynthesis.getVoices();
+  const pref = v.find(x => x.lang==='en-US' && x.name.includes('Google')) || v.find(x => x.lang==='en-US') || v[0];
+  if (pref) u.voice = pref;
+  window.speechSynthesis.speak(u);
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCORE DISPLAY
+// ─────────────────────────────────────────────────────────────
+
+function updateTotalScore() {
+  const total = state.reading.total + state.listening.total + state.writing.total;
+  const score = state.reading.score + state.listening.score + state.writing.score;
+  document.getElementById('totalScore').textContent = `Score: ${score} / ${total}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// ── READING MODULE
+// ─────────────────────────────────────────────────────────────
+
+function makeLetterHint(word) {
+  const reveal = Math.ceil(word.length / 2);
+  return word.split('').map((ch, i) =>
+    `<div class="letter-box${i < reveal ? '' : ' blank'}">${ch}</div>`).join('');
+}
+
+function renderReading() {
+  const s = state.reading;
+  const el = document.getElementById('reading');
+  if (s.reviewIdx !== -1) { renderReview('reading'); return; }
+  if (s.qIndex >= readingQuestions.length) {
+    stopTimer('reading');
+    el.innerHTML = completionHTML('reading', s.score, s.total, readingQuestions.length) + histNavHTML('reading');
+    return;
+  }
+  const q = readingQuestions[s.qIndex];
+  const progress = (s.qIndex / readingQuestions.length) * 100;
+  const passageHTML = q.p.replace('[B]', '<span class="blank-marker">___________</span>');
+  el.innerHTML = `
+    <div class="card">
+      <div class="question-header">
+        <h2>Fill in the Blank</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="question-counter">${s.qIndex + 1} / ${readingQuestions.length}</span>
+          <div class="timer-wrap" id="timer-reading"></div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      <h3>Complete the sentence with the correct word.</h3>
+      <div class="passage" style="margin-bottom:18px">${passageHTML}</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px">Letter hint (first half shown):</div>
+      <div class="letter-hint">${makeLetterHint(q.a)}</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;font-style:italic">Clue: ${q.h}</div>
+      <div class="word-input-wrap">
+        <input class="blank-input" id="readInput" autocomplete="off" spellcheck="false"
+          placeholder="Type the missing word…" style="width:220px;padding:6px 10px"/>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="checkReading()">Check</button>
+        <button class="btn btn-secondary" onclick="nextReading()" id="nextReadingBtn" style="display:none">Next →</button>
+        <button class="btn btn-secondary" onclick="skipReading()">Skip</button>
+      </div>
+      <div class="feedback" id="reading-feedback"></div>
+    </div>
+    ${histNavHTML('reading')}
+    <div class="card" style="font-size:0.88rem;color:var(--muted)">
+      <strong style="color:var(--text)">Reading Score:</strong> ${s.score} correct out of ${s.total} answered
+    </div>`;
+  const inp = document.getElementById('readInput');
+  if (inp) { inp.focus(); inp.addEventListener('keydown', e => { if (e.key==='Enter') checkReading(); }); }
+  startTimer('reading');
+}
+
+function checkReading(timedOut) {
+  const s = state.reading;
+  if (s.checked) return;
+  s.checked = true;
+  stopTimer('reading');
+  const q = readingQuestions[s.qIndex];
+  const inp = document.getElementById('readInput');
+  const val = (inp ? inp.value : '').trim().toLowerCase();
+  const isCorrect = val === q.a.toLowerCase();
+  s.total++;
+  if (isCorrect) s.score++;
+  s.history.push({ q, userAnswer: inp ? inp.value.trim() : '', correct: isCorrect });
+  updateTotalScore();
+  if (inp) { inp.readOnly = true; inp.classList.add(isCorrect ? 'correct' : 'incorrect'); }
+  const fb = document.getElementById('reading-feedback');
+  if (fb) {
+    fb.classList.add('show', isCorrect ? 'success' : 'error');
+    fb.innerHTML = isCorrect
+      ? `<strong>${timedOut ? 'Time up — but correct!' : 'Correct!'}</strong> The word is "<em>${q.a}</em>".`
+      : `<strong>${timedOut ? 'Time up!' : 'Not quite.'}</strong> The answer is "<em>${q.a}</em>" — ${q.h}`;
+  }
+  const nb = document.getElementById('nextReadingBtn'); if (nb) nb.style.display = 'inline-block';
+}
+
+function nextReading() { state.reading.qIndex++; state.reading.checked = false; renderReading(); }
+
+function skipReading() {
+  const s = state.reading;
+  stopTimer('reading');
+  s.history.push({ q: readingQuestions[s.qIndex], userAnswer: '', correct: false, skipped: true });
+  s.total++;
+  s.qIndex++;
+  s.checked = false;
+  renderReading();
+}
+
+// ─────────────────────────────────────────────────────────────
+// ── LISTENING MODULE
+// ─────────────────────────────────────────────────────────────
+
+let ttsUtterance = null;
+
+function renderListening() {
+  const s = state.listening;
+  const el = document.getElementById('listening');
+  if (s.reviewIdx !== -1) { renderReview('listening'); return; }
+  if (s.qIndex >= listeningQuestions.length) {
+    stopTimer('listening');
+    el.innerHTML = completionHTML('listening', s.score, s.total, listeningQuestions.length) + histNavHTML('listening');
+    return;
+  }
+  const progress = (s.qIndex / listeningQuestions.length) * 100;
+  el.innerHTML = `
+    <div class="card">
+      <div class="question-header">
+        <h2>Listen &amp; Transcribe</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="question-counter">${s.qIndex + 1} / ${listeningQuestions.length}</span>
+          <div class="timer-wrap" id="timer-listening"></div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      <h3>Listen carefully, then type exactly what you heard.</h3>
+      <div class="listen-controls">
+        <button class="play-btn" id="playBtn" onclick="playListening()">
+          ▶ Play Sentence <span class="play-badge" id="playCount">plays left: 3</span>
+        </button>
+      </div>
+      <textarea class="transcript-area" id="listenInput" placeholder="Type what you heard…" rows="3"></textarea>
+      <div class="listen-tip">Tip: punctuation and capitalisation are not required.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="checkListening()">Submit</button>
+        <button class="btn btn-secondary" onclick="nextListening()" id="nextListenBtn" style="display:none">Next →</button>
+      </div>
+      <div class="feedback" id="listening-feedback"></div>
+    </div>
+    ${histNavHTML('listening')}
+    <div class="card" style="font-size:0.88rem;color:var(--muted)">
+      <strong style="color:var(--text)">Listening Score:</strong> ${s.score} of ${s.total} correct
+    </div>`;
+  s.plays = 0;
+  updatePlayCount();
+  startTimer('listening');
+}
+
+function updatePlayCount() {
+  const remaining = 3 - state.listening.plays;
+  const badge = document.getElementById('playCount');
+  const btn = document.getElementById('playBtn');
+  if (badge) badge.textContent = `plays left: ${remaining}`;
+  if (btn) btn.disabled = remaining <= 0;
+}
+
+function playListening() {
+  const s = state.listening;
+  if (s.plays >= 3) return;
+  s.plays++;
+  updatePlayCount();
+  replayAudio(listeningQuestions[s.qIndex].sentence);
+}
+
+function normalize(str) {
+  return str.toLowerCase().replace(/[.,!?;:'"()\-–—]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function wordSimilarity(a, b) {
+  if (a === b) return 1;
+  const la = a.length, lb = b.length;
+  const dp = Array.from({length: la+1}, (_, i) => Array.from({length: lb+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+  for (let i = 1; i <= la; i++)
+    for (let j = 1; j <= lb; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return 1 - dp[la][lb] / Math.max(la, lb);
+}
+
+function checkListening(timedOut) {
+  const s = state.listening;
+  if (s.checked) return;
+  s.checked = true;
+  stopTimer('listening');
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  const q = listeningQuestions[s.qIndex];
+  const input = document.getElementById('listenInput');
+  const transcript = input ? input.value : '';
+  const userWords = normalize(transcript).split(' ');
+  const correctWords = normalize(q.sentence).split(' ');
+  let matched = 0;
+  correctWords.forEach(cw => { if (userWords.some(uw => wordSimilarity(uw, cw) >= 0.8)) matched++; });
+  const accuracy = matched / correctWords.length;
+  const isCorrect = accuracy >= 0.85;
+  s.total++;
+  if (isCorrect) s.score++;
+  s.history.push({ q, userTranscript: transcript, accuracy, correct: isCorrect });
+  updateTotalScore();
+  if (input) { input.readOnly = true; input.classList.add(isCorrect ? 'correct' : 'incorrect'); }
+  const fb = document.getElementById('listening-feedback');
+  if (fb) {
+    fb.classList.add('show', isCorrect ? 'success' : 'error');
+    fb.innerHTML = isCorrect
+      ? `<strong>${timedOut ? 'Time up — but great!' : 'Great job!'}</strong> ${Math.round(accuracy*100)}% accuracy.<br><em>Original: "${q.sentence}"</em>`
+      : `<strong>${timedOut ? 'Time up! ' : ''}${Math.round(accuracy*100)}% accuracy.</strong><br><em>Original: "${q.sentence}"</em>`;
+  }
+  const nb = document.getElementById('nextListenBtn'); if (nb) nb.style.display = 'inline-block';
+}
+
+function nextListening() {
+  state.listening.qIndex++;
+  state.listening.plays = 0;
+  state.listening.checked = false;
+  renderListening();
+}
+
+// ─────────────────────────────────────────────────────────────
+// ── WRITING MODULE
+// ─────────────────────────────────────────────────────────────
+
+function renderWriting() {
+  const s = state.writing;
+  const el = document.getElementById('writing');
+  if (s.reviewIdx !== -1) { renderReview('writing'); return; }
+  if (s.qIndex >= writingQuestions.length) {
+    stopTimer('writing');
+    el.innerHTML = completionHTML('writing', s.score, s.total, writingQuestions.length) + histNavHTML('writing');
+    return;
+  }
+  const q = writingQuestions[s.qIndex];
+  const progress = (s.qIndex / writingQuestions.length) * 100;
+  s.placed = [];
+  s.shuffledWords = [...q.w].sort(() => Math.random() - 0.5);
+  const contextHTML = q.c
+    ? `<div class="writing-context"><span class="context-label">Context</span>${q.c}</div>` : '';
+  el.innerHTML = `
+    <div class="card">
+      <div class="question-header">
+        <h2>Build the Sentence</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="question-counter">${s.qIndex + 1} / ${writingQuestions.length}</span>
+          <div class="timer-wrap" id="timer-writing"></div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+      ${contextHTML}
+      <h3>Arrange the words to complete the sentence:</h3>
+      <div class="answer-slots" id="answerSlots">
+        <span class="empty-hint">Click words below to add them here</span>
+      </div>
+      <div class="word-bank" id="wordBank"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="clearWriting()">Clear</button>
+        <button class="btn btn-primary" onclick="checkWriting()">Check Answer</button>
+        <button class="btn btn-secondary" onclick="nextWriting()" id="nextWritingBtn" style="display:none">Next →</button>
+      </div>
+      <div class="feedback" id="writing-feedback"></div>
+    </div>
+    ${histNavHTML('writing')}
+    <div class="card" style="font-size:0.88rem;color:var(--muted)">
+      <strong style="color:var(--text)">Writing Score:</strong> ${s.score} of ${s.total} correct
+    </div>`;
+  const bankEl = document.getElementById('wordBank');
+  s.shuffledWords.forEach((word, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.dataset.idx = idx;
+    chip.dataset.word = word;
+    chip.onclick = () => placeWord(chip);
+    bankEl.appendChild(chip);
+  });
+  startTimer('writing');
+}
+
+function placeWord(chip) {
+  if (chip.classList.contains('used')) return;
+  chip.classList.add('used');
+
+  const s = state.writing;
+  s.placed.push({ word: chip.dataset.word, chipIdx: chip.dataset.idx });
+  refreshAnswerSlots();
+}
+
+function removeWord(chipIdx) {
+  const s = state.writing;
+  const i = s.placed.findIndex(p => p.chipIdx == chipIdx);
+  if (i === -1) return;
+  s.placed.splice(i, 1);
+
+  // Re-enable chip in bank
+  const chip = document.querySelector(`.word-chip[data-idx="${chipIdx}"]`);
+  if (chip) chip.classList.remove('used');
+
+  refreshAnswerSlots();
+}
+
+function refreshAnswerSlots() {
+  const s = state.writing;
+  const slots = document.getElementById('answerSlots');
+  if (!slots) return;
+
+  if (s.placed.length === 0) {
+    slots.innerHTML = '<span class="empty-hint">Click words below to add them here</span>';
+    return;
+  }
+
+  slots.innerHTML = '';
+  s.placed.forEach(p => {
+    const pw = document.createElement('div');
+    pw.className = 'placed-word';
+    pw.innerHTML = `${p.word} <span class="remove-x" onclick="removeWord('${p.chipIdx}')">✕</span>`;
+    slots.appendChild(pw);
+  });
+}
+
+function clearWriting() {
+  state.writing.placed = [];
+  document.querySelectorAll('.word-chip').forEach(c => c.classList.remove('used'));
+  refreshAnswerSlots();
+}
+
+function checkWriting(timedOut) {
+  const s = state.writing;
+  if (s.checked) return;
+  s.checked = true;
+  stopTimer('writing');
+  const q = writingQuestions[s.qIndex];
+  const userSentence = s.placed.map(p => p.word).join(' ');
+  const correct = normalize(userSentence) === normalize(q.s);
+  s.total++;
+  if (correct) s.score++;
+  s.history.push({ q, userSentence, correct });
+  updateTotalScore();
+  const slots = document.getElementById('answerSlots');
+  const fb = document.getElementById('writing-feedback');
+  if (slots) slots.classList.add(correct ? 'correct' : 'incorrect');
+  if (fb) {
+    fb.classList.add('show', correct ? 'success' : 'error');
+    fb.innerHTML = correct
+      ? `<strong>${timedOut ? 'Time up — but perfect!' : 'Perfect!'}</strong> That's exactly right.`
+      : `<strong>${timedOut ? 'Time up!' : 'Not quite.'}</strong> Correct sentence:<br><em>"${q.s}"</em>`;
+  }
+  document.querySelectorAll('.word-chip').forEach(c => c.style.pointerEvents = 'none');
+  document.querySelectorAll('.placed-word .remove-x').forEach(x => x.style.display = 'none');
+  const nb = document.getElementById('nextWritingBtn'); if (nb) nb.style.display = 'inline-block';
+}
+
+function nextWriting() {
+  state.writing.qIndex++;
+  state.writing.placed = [];
+  state.writing.checked = false;
+  renderWriting();
+}
+
+// ─────────────────────────────────────────────────────────────
+// COMPLETION SCREEN
+// ─────────────────────────────────────────────────────────────
+
+function completionHTML(module, score, total, count) {
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '💪';
+  const msg = pct >= 80 ? 'Outstanding work!' : pct >= 60 ? 'Good progress!' : 'Keep practicing!';
+  return `<div class="card completion">
+    <div class="trophy">${emoji}</div>
+    <h2>${msg}</h2>
+    <div class="score-display">${score} / ${total}</div>
+    <p>${pct}% accuracy · ${count} questions</p>
+    <button class="btn btn-primary" onclick="restartModule('${module}')">Restart</button>
+  </div>`;
+}
+
+function restartModule(module) {
+  stopTimer(module);
+  const extra = module==='writing' ? {placed:[],shuffledWords:[]} : module==='listening' ? {plays:0} : {};
+  Object.assign(state[module], freshModState(extra));
+  if (module === 'reading') initReading();
+  if (module === 'writing') initWriting();
+  const renders = { reading: renderReading, listening: renderListening, writing: renderWriting };
+  renders[module]();
+  updateTotalScore();
+}
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+
+// Pre-load TTS voices (Chrome loads them async)
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+initReading();
+initWriting();
+renderReading();
+renderListening();
+renderWriting();
+</script>
+</body>
+</html>
