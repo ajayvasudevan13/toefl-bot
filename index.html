@@ -1082,8 +1082,10 @@ function showTab(tab) {
   document.querySelectorAll('#mainNav button').forEach(b => {
     if (b.textContent.toLowerCase().includes(tab)) b.classList.add('active');
   });
-  const s = state[tab];
-  if (s && s.reviewIdx === -1 && !s.checked) startTimer(tab);
+  // Render the module (needed because we no longer pre-render at init)
+  if (tab === 'reading')   renderReading();
+  if (tab === 'listening') renderListening();
+  if (tab === 'writing')   renderWriting();
 }
 
 // ─────────────────────────────────────────────────────────────
