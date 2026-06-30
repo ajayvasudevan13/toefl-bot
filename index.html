@@ -1014,7 +1014,62 @@ function renderHome() {
 }
 
 function launchModule(mod) {
+  if (mod === 'listening') { showListeningPicker(); return; }
   showTab(mod);
+}
+
+// ─────────────────────────────────────────────────────────────
+// LISTENING PICKER
+// ─────────────────────────────────────────────────────────────
+let filteredListeningQuestions = [];
+
+function showListeningPicker() {
+  // Count available questions per tier so we can show totals
+  const tiers = [
+    { label: '≤ 7 words',  sub: 'Short sentences',  max: 7,    min: 0  },
+    { label: '≤ 10 words', sub: 'Medium sentences', max: 10,   min: 0  },
+    { label: '≤ 14 words', sub: 'Longer sentences', max: 14,   min: 0  },
+    { label: '> 14 words', sub: 'Complex sentences',max: Infinity, min: 15 },
+  ];
+  tiers.forEach(t => {
+    t.count = listeningQuestions.filter(q => {
+      const wc = q.sentence.trim().split(/\s+/).length;
+      return wc >= t.min && wc <= t.max;
+    }).length;
+  });
+
+  const cards = tiers.map(t => `
+    <div class="module-card" onclick="launchListening(${t.min}, ${t.max === Infinity ? 9999 : t.max})"
+         style="padding:20px 14px">
+      <div class="mc-icon" style="font-size:1.8rem">🎧</div>
+      <div class="mc-title">${t.label}</div>
+      <div class="mc-sub">${t.count} sentence${t.count!==1?'s':''} · ${t.sub}</div>
+    </div>`).join('');
+
+  document.getElementById('home').innerHTML = `
+    <div class="card home-hero" style="padding:28px 20px 20px">
+      <div class="home-emoji" style="font-size:2.4rem">🎧</div>
+      <h2>Choose Sentence Length</h2>
+      <p>Pick the difficulty level for your listening practice.</p>
+    </div>
+    <div class="module-cards" style="grid-template-columns:repeat(2,1fr)">${cards}</div>
+    <div style="text-align:center;margin-top:4px">
+      <button class="btn btn-secondary" onclick="renderHome()">← Back to Home</button>
+    </div>`;
+  // Make sure home section is visible
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('home').classList.add('active');
+  document.getElementById('mainNav').style.display = 'none';
+}
+
+function launchListening(minWords, maxWords) {
+  filteredListeningQuestions = listeningQuestions.filter(q => {
+    const wc = q.sentence.trim().split(/\s+/).length;
+    return wc >= minWords && wc <= maxWords;
+  });
+  // Reset listening state for fresh start
+  Object.assign(state.listening, freshModState({ plays: 0 }));
+  showTab('listening');
 }
 
 function showHome() {
@@ -1316,19 +1371,19 @@ function renderListening() {
   const s = state.listening;
   const el = document.getElementById('listening');
   if (s.reviewIdx !== -1) { renderReview('listening'); return; }
-  if (s.qIndex >= listeningQuestions.length) {
+  if (s.qIndex >= filteredListeningQuestions.length) {
     stopTimer('listening');
-    el.innerHTML = completionHTML('listening', s.score, s.total, listeningQuestions.length) + histNavHTML('listening');
+    el.innerHTML = completionHTML('listening', s.score, s.total, filteredListeningQuestions.length) + histNavHTML('listening');
     return;
   }
-  const progress = (s.qIndex / listeningQuestions.length) * 100;
+  const progress = (s.qIndex / filteredListeningQuestions.length) * 100;
   el.innerHTML = `
     ${settingsBarHTML()}
     <div class="card">
       <div class="question-header">
         <h2>Listen &amp; Transcribe</h2>
         <div style="display:flex;align-items:center;gap:10px">
-          <span class="question-counter">${s.qIndex + 1} / ${listeningQuestions.length}</span>
+          <span class="question-counter">${s.qIndex + 1} / ${filteredListeningQuestions.length}</span>
           <div class="timer-wrap" id="timer-listening"></div>
         </div>
       </div>
@@ -1369,7 +1424,7 @@ function playListening() {
   if (s.plays >= 3) return;
   s.plays++;
   updatePlayCount();
-  replayAudio(listeningQuestions[s.qIndex].sentence);
+  replayAudio(filteredListeningQuestions[s.qIndex].sentence);
 }
 
 function normalize(str) {
@@ -1392,7 +1447,7 @@ function checkListening(timedOut) {
   s.checked = true;
   stopTimer('listening');
   if (window.speechSynthesis) window.speechSynthesis.cancel();
-  const q = listeningQuestions[s.qIndex];
+  const q = filteredListeningQuestions[s.qIndex];
   const input = document.getElementById('listenInput');
   const transcript = input ? input.value : '';
   const userWords = normalize(transcript).split(' ');
