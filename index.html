@@ -1533,10 +1533,9 @@ function showListeningPicker() {
 }
 
 function launchListening(minWords, maxWords) {
-  filteredListeningQuestions = listeningQuestions.filter(q => {
-    const wc = q.sentence.trim().split(/\s+/).length;
-    return wc >= minWords && wc <= maxWords;
-  });
+  filteredListeningQuestions = listeningQuestions
+    .filter(q => { const wc = q.sentence.trim().split(/\s+/).length; return wc >= minWords && wc <= maxWords; })
+    .sort(() => Math.random() - 0.5);
   // Reset listening state for fresh start
   Object.assign(state.listening, freshModState({ plays: 0 }));
   showTab('listening');
