@@ -1720,10 +1720,32 @@ function replayAudio(sentence) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(sentence);
-  u.rate = 0.88; u.lang = 'en-US';
+  u.lang = 'en-US';
+  u.rate = 0.82;   // slightly slower for clarity
+  u.pitch = 1.0;
+
   const v = window.speechSynthesis.getVoices();
-  const pref = v.find(x => x.lang==='en-US' && x.name.includes('Google')) || v.find(x => x.lang==='en-US') || v[0];
-  if (pref) u.voice = pref;
+  // Priority list: best clear American voices across Chrome, Edge, iOS Safari
+  const preferred = [
+    'Samantha',           // iOS Safari — clearest US voice
+    'Nicky',              // iOS 17+ US voice
+    'Aaron',              // iOS 16+ US voice
+    'Google US English',  // Chrome desktop/Android
+    'Microsoft Aria Online (Natural) - English (United States)',  // Edge
+    'Microsoft Jenny Online (Natural) - English (United States)', // Edge
+    'Microsoft Guy Online (Natural) - English (United States)',   // Edge
+    'Alex',               // older macOS/iOS
+  ];
+  let voice = null;
+  for (const name of preferred) {
+    voice = v.find(x => x.name === name);
+    if (voice) break;
+  }
+  // Fallback: any en-US voice, then any English, then anything
+  if (!voice) voice = v.find(x => x.lang === 'en-US')
+                    || v.find(x => x.lang.startsWith('en'))
+                    || v[0];
+  if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
 }
 
